@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Books</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <style> /* Some extra styles for this page */
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .action-form { display: inline; }
+    </style>
+</head>
+<body>
+<div class="container" style="max-width: 800px;">
+    <h1>Book Management</h1>
+    <p><a th:href="@{/dashboard}">Back to Dashboard</a></p>
+    <hr/>
+
+    <h2>Add New Book</h2>
+    <form th:action="@{/admin/books/add}" th:object="${newBook}" method="post">
+        <div class="form-group">
+            <label>Title:</label>
+            <input type="text" th:field="*{title}" required />
+        </div>
+        <div class="form-group">
+            <label>Author:</label>
+            <input type="text" th:field="*{author}" required />
+        </div>
+        <div class="form-group">
+            <label>Total Copies:</label>
+            <input type="number" th:field="*{totalCopies}" required />
+        </div>
+        <div class="form-group">
+            <label>Available Copies:</label>
+            <input type="number" th:field="*{availableCopies}" required />
+        </div>
+        <button type="submit">Add Book</button>
+    </form>
+    <hr/>
+
+    <h2>Existing Books</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Available</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="book : ${books}">
+            <td th:text="${book.id}"></td>
+            <td th:text="${book.title}"></td>
+            <td th:text="${book.author}"></td>
+            <td th:text="${book.availableCopies} + ' / ' + ${book.totalCopies}"></td>
+            <td>
+                <form th:action="@{/admin/books/delete/{id}(id=${book.id})}" method="post" class="action-form">
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

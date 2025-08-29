@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <style>
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; margin-bottom: 2rem; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .action-form { display: inline; }
+    </style>
+</head>
+<body>
+<div class="container" style="max-width: 900px;">
+    <h1>Welcome, <span th:text="${user.name}">User</span>!</h1>
+    <p>Your role is: <span th:text="${user.role}">[ROLE]</span></p>
+    <hr/>
+
+    <div sec:authorize="hasRole('ADMIN')">
+        <h2>Admin Panel</h2>
+        <p><a th:href="@{/admin/books}">Manage Books</a></p>
+        <p><a th:href="@{/admin/loans}">View All System Loans</a></p>
+    </div>
+
+    <div sec:authorize="hasRole('USER')">
+        <h2>My Loan History</h2>
+        <div th:if="${#lists.isEmpty(loans)}">
+            <p>You have no loan history yet.</p>
+        </div>
+        <table th:unless="${#lists.isEmpty(loans)}">
+            <thead>
+            <tr>
+                <th>Book Title</th>
+                <th>Issue Date</th>
+                <th>Due Date</th>
+                <th>Return Date</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="loan : ${loans}">
+                <td th:text="${loan.book.title}"></td>
+                <td th:text="${loan.issueDate}"></td>
+                <td th:text="${loan.dueDate}"></td>
+                <td th:text="${loan.returnDate} ?: 'Not Returned Yet'"></td>
+                <td>
+                    <form th:if="${loan.returnDate == null}" th:action="@{/return-loan/{id}(id=${loan.id})}" method="post" class="action-form">
+                        <button type="submit">Return</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <h2>Available Books to Borrow</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Available Copies</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="book : ${books}" th:if="${book.availableCopies > 0}">
+                <td th:text="${book.title}"></td>
+                <td th:text="${book.author}"></td>
+                <td th:text="${book.availableCopies}"></td>
+                <td>
+                    <form th:action="@{/issue-book/{id}(id=${book.id})}" method="post" class="action-form">
+                        <button type="submit">Issue</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <br/>
+    <form th:action="@{/logout}" method="post">
+        <button type="submit">Logout</button>
+    </form>
+</div>
+</body>
+</html>

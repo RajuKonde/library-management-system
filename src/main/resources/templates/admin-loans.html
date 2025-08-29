@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>All Loans</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <style>
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+<div class="container" style="max-width: 900px;">
+    <h1>All System Loans</h1>
+    <p><a th:href="@{/dashboard}">Back to Dashboard</a></p>
+    <hr/>
+    <table>
+        <thead>
+        <tr>
+            <th>Loan ID</th>
+            <th>Book Title</th>
+            <th>User Name</th>
+            <th>Issue Date</th>
+            <th>Return Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="loan : ${loans}">
+            <td th:text="${loan.id}"></td>
+            <td th:text="${loan.book.title}"></td>
+            <td th:text="${loan.user.name}"></td>
+            <td th:text="${loan.issueDate}"></td>
+            <td th:text="${loan.returnDate} ?: 'Not Returned Yet'"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
