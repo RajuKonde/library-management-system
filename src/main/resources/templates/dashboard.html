@@ -17,14 +17,23 @@
     <p>Your role is: <span th:text="${user.role}">[ROLE]</span></p>
     <hr/>
 
+    <!-- ADMIN SECTION -->
     <div sec:authorize="hasRole('ADMIN')">
         <h2>Admin Panel</h2>
         <p><a th:href="@{/admin/books}">Manage Books</a></p>
         <p><a th:href="@{/admin/loans}">View All System Loans</a></p>
+        <p><a th:href="@{/admin/users}">Manage Users</a></p>
+        <p><a th:href="@{/chat}">Go to Public Chat</a></p>
     </div>
 
+    <!-- USER SECTION - NOW CORRECTED -->
     <div sec:authorize="hasRole('USER')">
-        <h2>My Loan History</h2>
+        <h2>User Dashboard</h2>
+        <p><a th:href="@{/chat}">Go to Public Chat</a></p>
+        <hr/>
+
+        <h2>My Current Loans</h2>
+        <!-- This is the simplified condition that fixes the bug -->
         <div th:if="${#lists.isEmpty(loans)}">
             <p>You have no loan history yet.</p>
         </div>
@@ -39,12 +48,14 @@
             </tr>
             </thead>
             <tbody>
+            <!-- This loop correctly displays active and returned loans -->
             <tr th:each="loan : ${loans}">
                 <td th:text="${loan.book.title}"></td>
                 <td th:text="${loan.issueDate}"></td>
                 <td th:text="${loan.dueDate}"></td>
                 <td th:text="${loan.returnDate} ?: 'Not Returned Yet'"></td>
                 <td>
+                    <!-- Only show the Return button if the book has not been returned -->
                     <form th:if="${loan.returnDate == null}" th:action="@{/return-loan/{id}(id=${loan.id})}" method="post" class="action-form">
                         <button type="submit">Return</button>
                     </form>
@@ -85,3 +96,4 @@
 </div>
 </body>
 </html>
+

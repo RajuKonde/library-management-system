@@ -8,7 +8,10 @@
         table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
         th { background-color: #f2f2f2; }
-        .action-form { display: inline; }
+        .action-form { display: inline; margin-left: 5px;}
+        /* Style for the Edit button to make it look different */
+        .edit-button { background-color: #6b7280; }
+        .edit-button:hover { background-color: #4b5563; }
     </style>
 </head>
 <body>
@@ -17,6 +20,7 @@
     <p><a th:href="@{/dashboard}">Back to Dashboard</a></p>
     <hr/>
 
+    <!-- Form to Add a New Book -->
     <h2>Add New Book</h2>
     <form th:action="@{/admin/books/add}" th:object="${newBook}" method="post">
         <div class="form-group">
@@ -26,6 +30,10 @@
         <div class="form-group">
             <label>Author:</label>
             <input type="text" th:field="*{author}" required />
+        </div>
+        <div class="form-group">
+            <label>ISBN:</label>
+            <input type="text" th:field="*{isbn}" />
         </div>
         <div class="form-group">
             <label>Total Copies:</label>
@@ -39,6 +47,7 @@
     </form>
     <hr/>
 
+    <!-- Table of Existing Books -->
     <h2>Existing Books</h2>
     <table>
         <thead>
@@ -57,6 +66,12 @@
             <td th:text="${book.author}"></td>
             <td th:text="${book.availableCopies} + ' / ' + ${book.totalCopies}"></td>
             <td>
+                <!-- THIS IS THE NEW EDIT BUTTON -->
+                <a th:href="@{/admin/books/edit/{id}(id=${book.id})}">
+                    <button type="button" class="edit-button">Edit</button>
+                </a>
+
+                <!-- Existing Delete form -->
                 <form th:action="@{/admin/books/delete/{id}(id=${book.id})}" method="post" class="action-form">
                     <button type="submit">Delete</button>
                 </form>

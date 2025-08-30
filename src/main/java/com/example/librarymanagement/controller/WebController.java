@@ -18,14 +18,9 @@ import java.util.List;
 @Controller
 public class WebController {
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private LoanRepository loanRepository;
-
-    @Autowired
-    private BookRepository bookRepository; // Required to fetch books
+    @Autowired private UserRepository userRepository;
+    @Autowired private LoanRepository loanRepository;
+    @Autowired private BookRepository bookRepository;
 
     @GetMapping("/login")
     public String login() {
@@ -37,27 +32,31 @@ public class WebController {
         return "register";
     }
 
+    // This method now correctly shows the public chat page
+    @GetMapping("/chat")
+    public String chat() {
+        return "chat";
+    }
+
     @GetMapping("/dashboard")
     public String dashboard(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         User currentUser = userRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         model.addAttribute("user", currentUser);
 
-        // Check the user's role
+        // This is the corrected logic that fixes the user dashboard
         if ("ROLE_USER".equals(currentUser.getRole())) {
-            // If they are a user, get their loans
+            // Get the user's personal loans
             List<Loan> userLoans = loanRepository.findByUserId(currentUser.getId());
             model.addAttribute("loans", userLoans);
 
-            // --- THIS IS THE CRITICAL PART THAT WAS MISSING ---
-            // Also get the list of ALL books for them to browse
+            // ALSO get the list of ALL books for the user to browse
             List<Book> allBooks = bookRepository.findAll();
             model.addAttribute("books", allBooks);
-            // -------------------------------------------------
-
         }
-        // Admins don't need the loan/book list on this specific page
 
         return "dashboard";
     }
+
+    // The "/chat-with-admin" method has been removed.
 }
