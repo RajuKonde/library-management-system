@@ -1,11 +1,8 @@
-# Azure DevOps Pipeline for Library Management System
-# Builds the Java project and deploys it to a local Tomcat server via a self-hosted agent.
-
 trigger:
   - main
 
 pool:
-  name: Default # This is the name of your self-hosted agent pool
+  name: Default
 
 stages:
   - stage: Build
@@ -19,16 +16,13 @@ stages:
             inputs:
               mavenPomFile: 'pom.xml'
               goals: 'clean package'
-              options: '-DskipTests=true' # Skipping tests for faster builds, can be enabled later
-              publishJUnitResults: false
-              javaHomeOption: 'JDKVersion'
-              jdkVersionOption: '1.17'
+              options: '-DskipTests=true'
 
           - task: CopyFiles@2
-            displayName: 'Copy JAR to Artifact Staging'
+            displayName: 'Copy WAR to Artifact Staging'
             inputs:
               SourceFolder: '$(System.DefaultWorkingDirectory)/target'
-              Contents: '*.jar'
+              Contents: '*.war' # <-- Changed from .jar to .war
               TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
           - task: PublishBuildArtifacts@1
@@ -36,7 +30,6 @@ stages:
             inputs:
               PathtoPublish: '$(Build.ArtifactStagingDirectory)'
               ArtifactName: 'drop'
-              publishLocation: 'Container'
 
   - stage: Deploy
     displayName: 'Deploy Stage'
@@ -55,30 +48,22 @@ stages:
 
           - script: |
               echo "Starting deployment to local Tomcat server..."
-              
-              # --- IMPORTANT: Verify this is your correct Tomcat path ---
               TOMCAT_PATH="/opt/banking/apache-tomcat-10.1.23"
               
-              # Find the new JAR file
-              JAR_FILE=$(find $(System.ArtifactsDirectory)/drop -name "*.jar")
-              echo "Found JAR file: $JAR_FILE"
+              WAR_FILE=$(find $(System.ArtifactsDirectory)/drop -name "*.war") # <-- Find .war file
+              echo "Found WAR file: $WAR_FILE"
               
-              # Stop Tomcat
               echo "Stopping Tomcat..."
               $TOMCAT_PATH/bin/shutdown.sh
-              sleep 10 # Wait for Tomcat to shut down
+              sleep 10
               
-              # Clean old deployments
               echo "Cleaning old application files..."
-              rm -rf $TOMCAT_PATH/webapps/librarymanagement-0.0.1-SNAPSHOT.jar
-              rm -rf $TOMCAT_PATH/webapps/librarymanagement-0.0.1-SNAPSHOT
+              rm -rf $TOMCAT_PATH/webapps/ROOT.war
+              rm -rf $TOMCAT_PATH/webapps/ROOT
               
-              # Deploy the new JAR file by renaming it to ROOT.war or a specific name
-              # For a Spring Boot JAR, we can just copy it. Let's rename it for clarity.
-              echo "Copying new JAR file to Tomcat webapps..."
-              cp $JAR_FILE $TOMCAT_PATH/webapps/library.jar
+              echo "Copying new WAR file as ROOT.war..."
+              cp $WAR_FILE $TOMCAT_PATH/webapps/ROOT.war # <-- Deploy as ROOT.war
               
-              # Start Tomcat
               echo "Starting Tomcat..."
               $TOMCAT_PATH/bin/startup.sh
               
