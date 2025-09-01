@@ -14,9 +14,8 @@ spec:
     spec:
       containers:
         - name: library-app-container
-          # 👇 UPDATE THIS LINE with your Docker Hub username
-          image: your-dockerhub-username/library-management-system:latest
-          # 👇 UPDATE THIS LINE
+          # This line is now corrected with your username
+          image: konderaju1238/library-management-system:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
