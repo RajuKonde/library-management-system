@@ -12,10 +12,8 @@ spec:
       labels:
         app: library-app
     spec:
-      # 👇 THIS IS THE NEW SECTION THAT USES YOUR SECRET
-      imagePullSecrets:
-        - name: dockerhub-creds
-      # 👆 END OF NEW SECTION
+      # The imagePullSecrets section is gone from here.
+      # The Service Account provides the secret automatically.
       containers:
         - name: library-app-container
           image: konderaju1238/library-management-system:latest
