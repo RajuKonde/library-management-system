@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -32,7 +33,6 @@ public class WebController {
         return "register";
     }
 
-    // This method now correctly shows the public chat page
     @GetMapping("/chat")
     public String chat() {
         return "chat";
@@ -44,13 +44,9 @@ public class WebController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         model.addAttribute("user", currentUser);
 
-        // This is the corrected logic that fixes the user dashboard
         if ("ROLE_USER".equals(currentUser.getRole())) {
-            // Get the user's personal loans
             List<Loan> userLoans = loanRepository.findByUserId(currentUser.getId());
             model.addAttribute("loans", userLoans);
-
-            // ALSO get the list of ALL books for the user to browse
             List<Book> allBooks = bookRepository.findAll();
             model.addAttribute("books", allBooks);
         }
@@ -58,5 +54,15 @@ public class WebController {
         return "dashboard";
     }
 
-    // The "/chat-with-admin" method has been removed.
+    @GetMapping("/chat-with-admin")
+    public String chatWithAdmin(RedirectAttributes redirectAttributes) {
+        List<User> admins = userRepository.findByRole("ROLE_ADMIN");
+
+        if (admins.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "No admin is available to chat.");
+            return "redirect:/dashboard";
+        }
+        String adminEmail = admins.get(0).getEmail();
+        return "redirect:/chat?recipient=" + adminEmail;
+    }
 }

@@ -14,9 +14,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    // We no longer need to autowire the CustomUserDetailsService here.
-    // Spring Boot will find it automatically.
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -27,7 +24,10 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/register", "/css/**", "/api/auth/register").permitAll()
+                        // --- THIS IS THE FIX ---
+                        // Allow public access to actuator, login, registration, and static files
+                        .requestMatchers("/actuator/**", "/login", "/register", "/css/**", "/js/**", "/api/auth/register").permitAll()
+                        // All other requests must be authenticated
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -42,6 +42,4 @@ public class SecurityConfig {
 
         return http.build();
     }
-
-    // The old AuthenticationManager bean has been REMOVED.
 }

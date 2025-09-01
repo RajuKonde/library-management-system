@@ -13,8 +13,5 @@ public class LibrarymanagementApplication extends SpringBootServletInitializer {
     }
 
     // ADD THIS METHOD
-    @Override
-    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        return application.sources(LibrarymanagementApplication.class);
-    }
+
 }

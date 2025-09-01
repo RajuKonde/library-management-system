@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: library-app-service
+  labels:
+    app: library-app # This label is important for discovery
+spec:
+  selector:
+    app: library-app
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      name: http

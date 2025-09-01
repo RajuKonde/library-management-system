@@ -1,71 +1,58 @@
 trigger:
   - main
 
-pool:
-  name: Default
+pool: Default # This must be your self-hosted agent pool
+
+variables:
+  dockerhubUsername: 'konderaju1238'
+  imageName: 'library-management-system'
+  tag: '$(Build.BuildId)'
 
 stages:
   - stage: Build
-    displayName: 'Build Stage'
+    displayName: 'Build and Push Docker Image'
     jobs:
-      - job: BuildJob
-        displayName: 'Build and Package Application'
+      - job: BuildAndPush
+        displayName: 'Build and Push'
         steps:
           - task: Maven@3
-            displayName: 'Build with Maven'
+            displayName: 'Build Spring Boot JAR'
             inputs:
               mavenPomFile: 'pom.xml'
-              goals: 'clean package'
+              goals: 'package'
               options: '-DskipTests=true'
+              publishJUnitResults: false
+              javaHomeOption: 'JDKVersion'
+              jdkVersionOption: '1.17'
 
-          - task: CopyFiles@2
-            displayName: 'Copy WAR to Artifact Staging'
+          - task: Docker@2
+            displayName: 'Build Docker Image'
             inputs:
-              SourceFolder: '$(System.DefaultWorkingDirectory)/target'
-              Contents: '*.war' # <-- Changed from .jar to .war
-              TargetFolder: '$(Build.ArtifactStagingDirectory)'
+              command: build
+              repository: '$(dockerhubUsername)/$(imageName)'
+              tags: '$(tag)'
+              dockerfile: 'Dockerfile'
+              buildContext: '.'
 
-          - task: PublishBuildArtifacts@1
-            displayName: 'Publish Build Artifact'
+          - task: Docker@2
+            displayName: 'Push Image to Docker Hub'
             inputs:
-              PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-              ArtifactName: 'drop'
+              containerRegistry: 'DockerHubConnection'
+              command: push
+              repository: '$(dockerhubUsername)/$(imageName)'
+              tags: '$(tag)'
 
   - stage: Deploy
-    displayName: 'Deploy Stage'
+    displayName: 'Deploy to Kubernetes'
     dependsOn: Build
     jobs:
-      - job: DeployJob
-        displayName: 'Deploy to Local Tomcat'
+      - job: DeployToK8s
+        displayName: 'Deploy'
         steps:
-          - task: DownloadBuildArtifacts@0
-            displayName: 'Download Build Artifact'
-            inputs:
-              buildType: 'current'
-              downloadType: 'single'
-              artifactName: 'drop'
-              downloadPath: '$(System.ArtifactsDirectory)'
-
           - script: |
-              echo "Starting deployment to local Tomcat server..."
-              TOMCAT_PATH="/opt/banking/apache-tomcat-10.1.23"
-              
-              WAR_FILE=$(find $(System.ArtifactsDirectory)/drop -name "*.war") # <-- Find .war file
-              echo "Found WAR file: $WAR_FILE"
-              
-              echo "Stopping Tomcat..."
-              $TOMCAT_PATH/bin/shutdown.sh
-              sleep 10
-              
-              echo "Cleaning old application files..."
-              rm -rf $TOMCAT_PATH/webapps/ROOT.war
-              rm -rf $TOMCAT_PATH/webapps/ROOT
-              
-              echo "Copying new WAR file as ROOT.war..."
-              cp $WAR_FILE $TOMCAT_PATH/webapps/ROOT.war # <-- Deploy as ROOT.war
-              
-              echo "Starting Tomcat..."
-              $TOMCAT_PATH/bin/startup.sh
-              
-              echo "Deployment complete."
-            displayName: 'Run Deployment Script'
+              echo "--- Deploying image: $(dockerhubUsername)/$(imageName):$(tag) ---"
+              kubectl set image deployment/library-app-deployment library-app-container=$(dockerhubUsername)/$(imageName):$(tag) --record
+              echo "--- Applying other manifests ---"
+              kubectl apply -f k8s/
+              echo "--- Deployment successful ---"
+            displayName: 'Run kubectl commands on self-hosted agent'

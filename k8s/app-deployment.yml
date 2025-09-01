@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: library-app-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: library-app
+  template:
+    metadata:
+      labels:
+        app: library-app
+    spec:
+      containers:
+        - name: library-app-container
+          # 👇 UPDATE THIS LINE with your Docker Hub username
+          image: your-dockerhub-username/library-management-system:latest
+          # 👇 UPDATE THIS LINE
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres-service:5432/librarydatabase
+            - name: SPRING_DATASOURCE_USERNAME
+              value: libraryuser
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: Library@123
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              value: update
