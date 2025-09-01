@@ -15,7 +15,16 @@ stages:
       - job: BuildAndPush
         displayName: 'Build and Push'
         steps:
-          - task: Maven@3
+          # 👇 THIS IS THE NEW TASK TO FIX THE ERROR
+          - task: JavaToolInstaller@0
+            displayName: 'Install JDK 17'
+            inputs:
+              versionSpec: '17'
+              jdkArchitectureOption: 'x64'
+              jdkSourceOption: 'PreInstalled'
+
+          # 👇 I have also updated this task from Maven@3 to Maven@4
+          - task: Maven@4
             displayName: 'Build Spring Boot JAR'
             inputs:
               mavenPomFile: 'pom.xml'
