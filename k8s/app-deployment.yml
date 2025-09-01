@@ -12,9 +12,12 @@ spec:
       labels:
         app: library-app
     spec:
+      # 👇 THIS IS THE NEW SECTION THAT USES YOUR SECRET
+      imagePullSecrets:
+        - name: dockerhub-creds
+      # 👆 END OF NEW SECTION
       containers:
         - name: library-app-container
-          # This line is now corrected with your username
           image: konderaju1238/library-management-system:latest
           imagePullPolicy: Always
           ports:
