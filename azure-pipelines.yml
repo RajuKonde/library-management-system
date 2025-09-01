@@ -1,7 +1,7 @@
 trigger:
   - main
 
-pool: Default # This must be your self-hosted agent pool
+pool: Default
 
 variables:
   dockerhubUsername: 'konderaju1238'
@@ -15,15 +15,15 @@ stages:
       - job: BuildAndPush
         displayName: 'Build and Push'
         steps:
-          # 👇 THIS IS THE NEW TASK TO FIX THE ERROR
           - task: JavaToolInstaller@0
             displayName: 'Install JDK 17'
             inputs:
               versionSpec: '17'
               jdkArchitectureOption: 'x64'
-              jdkSourceOption: 'PreInstalled'
+              # 👇 THIS IS THE FIX. It now downloads the JDK.
+              jdkSourceOption: 'JDK_Net'
+              jdkImplementation: 'Temurin'
 
-          # 👇 I have also updated this task from Maven@3 to Maven@4
           - task: Maven@4
             displayName: 'Build Spring Boot JAR'
             inputs:
