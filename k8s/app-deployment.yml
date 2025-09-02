@@ -12,11 +12,11 @@ spec:
       labels:
         app: library-app
     spec:
-      # The imagePullSecrets section is gone from here.
       # The Service Account provides the secret automatically.
       containers:
         - name: library-app-container
-          image: konderaju1238/library-management-system:latest
+          # 👇 THIS IS THE FINAL FIX. Using a tag that exists.
+          image: konderaju1238/library-management-system:74
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
