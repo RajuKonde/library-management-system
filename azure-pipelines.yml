@@ -15,8 +15,6 @@ stages:
       - job: BuildAndPush
         displayName: 'Build and Push'
         steps:
-          # We have REMOVED the failing JavaToolInstaller task.
-          # This Maven task will now use the Java we just installed.
           - task: Maven@4
             displayName: 'Build Spring Boot JAR'
             inputs:
@@ -24,7 +22,6 @@ stages:
               goals: 'package'
               options: '-DskipTests=true'
               publishJUnitResults: false
-              # We also remove the javaHomeOption and jdkVersionOption lines.
 
           - task: Docker@2
             displayName: 'Build Docker Image'
@@ -34,6 +31,8 @@ stages:
               tags: '$(tag)'
               dockerfile: 'Dockerfile'
               buildContext: '.'
+              # This line forces a clean build to prevent using an old JAR file
+              arguments: '--no-cache'
 
           - task: Docker@2
             displayName: 'Push Image to Docker Hub'
