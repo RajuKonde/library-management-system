@@ -6,12 +6,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class RootController {
 
-    /**
-     * This method handles requests to the root URL ("/") and redirects them
-     * to the "/login" page, which is handled by Spring Security.
-     */
     @GetMapping("/")
     public String root() {
+        // This redirects any request for the main URL "/"
+        // to the "/login" page.
         return "redirect:/login";
     }
 }
