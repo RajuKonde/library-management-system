@@ -28,59 +28,6 @@
         <h2>User Dashboard</h2>
         <p><a th:href="@{/chat}">Go to Public Chat</a></p>
         <hr/>
-
-        <h2>My Current Loans</h2>
-        <div th:if="${#lists.isEmpty(loans)}">
-            <p>You have no loan history yet.</p>
-        </div>
-        <table th:unless="${#lists.isEmpty(loans)}">
-            <thead>
-            <tr>
-                <th>Book Title</th>
-                <th>Issue Date</th>
-                <th>Due Date</th>
-                <th>Return Date</th>
-                <th>Action</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="loan : ${loans}">
-                <td th:text="${loan.book.title}"></td>
-                <td th:text="${loan.issueDate}"></td>
-                <td th:text="${loan.dueDate}"></td>
-                <td th:text="${loan.returnDate} ?: 'Not Returned Yet'"></td>
-                <td>
-                    <form th:if="${loan.returnDate == null}" th:action="@{/return-loan/{id}(id=${loan.id})}" method="post" class="action-form">
-                        <button type="submit">Return</button>
-                    </form>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-
-        <h2>Available Books to Borrow</h2>
-        <table>
-            <thead>
-            <tr>
-                <th>Title</th>
-                <th>Author</th>
-                <th>Available Copies</th>
-                <th>Action</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="book : ${books}" th:if="${book.availableCopies > 0}">
-                <td th:text="${book.title}"></td>
-                <td th:text="${book.author}"></td>
-                <td th:text="${book.availableCopies}"></td>
-                <td>
-                    <form th:action="@{/issue-book/{id}(id=${book.id})}" method="post" class="action-form">
-                        <button type="submit">Issue</button>
-                    </form>
-                </td>
-            </tr>
-            </tbody>
-        </table>
     </div>
 
     <br/>
