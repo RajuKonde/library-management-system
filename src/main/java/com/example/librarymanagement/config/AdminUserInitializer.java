@@ -21,7 +21,7 @@ public class AdminUserInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         // Check if an ADMIN user already exists to avoid creating duplicates
-        if (userRepository.findByRole("ADMIN").isEmpty()) {
+        if (userRepository.findByRole("ROLE_ADMIN").isEmpty()) {
             User admin = new User();
             admin.setName("admin");
             admin.setEmail("admin@library.com");
