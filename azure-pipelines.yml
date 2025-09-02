@@ -31,7 +31,6 @@ stages:
               tags: '$(tag)'
               dockerfile: 'Dockerfile'
               buildContext: '.'
-              # This line forces a clean build to prevent using an old JAR file
               arguments: '--no-cache'
 
           - task: Docker@2
@@ -49,10 +48,9 @@ stages:
       - job: DeployToK8s
         displayName: 'Deploy'
         steps:
+          # 👇 THIS SCRIPT IS NOW SIMPLER AND MORE RELIABLE
           - script: |
-              echo "--- Deploying image: $(dockerhubUsername)/$(imageName):$(tag) ---"
+              echo "--- Triggering deployment with new image: $(dockerhubUsername)/$(imageName):$(tag) ---"
               kubectl set image deployment/library-app-deployment library-app-container=$(dockerhubUsername)/$(imageName):$(tag) --record
-              echo "--- Applying other manifests ---"
-              kubectl apply -f k8s/
-              echo "--- Deployment successful ---"
-            displayName: 'Run kubectl commands on self-hosted agent'
+              echo "--- Rolling update initiated successfully ---"
+            displayName: 'Trigger Kubernetes Rolling Update'
