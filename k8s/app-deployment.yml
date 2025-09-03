@@ -12,11 +12,9 @@ spec:
       labels:
         app: library-app
     spec:
-      # The Service Account provides the secret automatically.
       containers:
         - name: library-app-container
-          # 👇 THIS IS THE FINAL FIX. Using a tag that exists.
-          image: konderaju1238/library-management-system:74
+          image: konderaju1238/library-management-system:latest # The pipeline will update this tag
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
