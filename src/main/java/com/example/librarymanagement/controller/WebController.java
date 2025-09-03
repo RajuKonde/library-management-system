@@ -44,7 +44,11 @@ public class WebController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         model.addAttribute("user", currentUser);
 
-        if ("ROLE_USER".equals(currentUser.getRole())) {
+        // This is the fix: Check the user's authority from the security context
+        boolean isUserRole = userDetails.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_USER"));
+
+        if (isUserRole) {
             List<Loan> userLoans = loanRepository.findByUserId(currentUser.getId());
             model.addAttribute("loans", userLoans);
             List<Book> allBooks = bookRepository.findAll();
