@@ -45,6 +45,7 @@ public class WebController {
         model.addAttribute("user", currentUser);
 
         // This is the fix: Check the user's authority from the security context
+        // and load data if they are a standard user.
         boolean isUserRole = userDetails.getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().equals("ROLE_USER"));
 
