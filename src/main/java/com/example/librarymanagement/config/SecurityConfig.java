@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -22,11 +23,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.disable()) // Disable CSRF for simplicity in this project
                 .authorizeHttpRequests(auth -> auth
-                        // --- THIS IS THE FIX ---
-                        // Allow public access to actuator, login, registration, and static files
-                        .requestMatchers("/actuator/**", "/login", "/register", "/css/**", "/js/**", "/api/auth/register").permitAll()
+                        // Allow public access to the root, actuator, login, registration, and static files
+                        .requestMatchers("/", "/actuator/prometheus", "/login", "/register", "/css/**", "/js/**").permitAll()
+
+                        // Rule for Admins: Only users with ROLE_ADMIN can access /admin/** URLs
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+
                         // All other requests must be authenticated
                         .anyRequest().authenticated()
                 )
@@ -35,10 +39,7 @@ public class SecurityConfig {
                         .defaultSuccessUrl("/dashboard", true)
                         .permitAll()
                 )
-                .logout(logout -> logout
-                        .logoutSuccessUrl("/login?logout")
-                        .permitAll()
-                );
+                .logout(LogoutConfigurer::permitAll);
 
         return http.build();
     }
